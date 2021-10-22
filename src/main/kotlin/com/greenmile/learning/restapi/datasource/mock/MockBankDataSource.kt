@@ -7,10 +7,10 @@ import org.springframework.stereotype.Repository
 @Repository
 class MockBankDataSource : BankDataSource {
     val banks = mutableListOf(
-        Bank("1234", 2.0, 12),
-        Bank("2312", 1.0, 8),
-        Bank("6734", 5.0, 3),
-        Bank("3534", 5.0, 3),
+        Bank(accountNumber = "1234", trust = 2.0, transactionFee = 12),
+        Bank(accountNumber = "2312", trust = 1.0, transactionFee = 8),
+        Bank(accountNumber = "6734", trust = 5.0, transactionFee = 3),
+        Bank(accountNumber = "3534", trust = 5.0, transactionFee = 3),
     )
 
     override fun retrieveBanks(): Collection<Bank> = banks
