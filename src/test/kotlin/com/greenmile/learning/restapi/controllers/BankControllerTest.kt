@@ -2,6 +2,7 @@ package com.greenmile.learning.restapi.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.greenmile.learning.restapi.model.Bank
+import com.greenmile.learning.restapi.model.BankDAO
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -86,7 +87,7 @@ internal class BankControllerTest @Autowired constructor(
         @Test
         fun `should create a bank`() {
             // given
-            val newBank = Bank("acc123", 31.2, 2)
+            val newBank = Bank(accountNumber = "acc123", trust = 31.2, transactionFee = 2)
 
             // when
             val performPost = mockMVC.post(baseUrl) {
@@ -108,7 +109,7 @@ internal class BankControllerTest @Autowired constructor(
         @Test
         fun `should return BAD REQUEST if given account number already exists when creating a bank`() {
             // given
-            val invalidBank = Bank("1234", 31.2, 2)
+            val invalidBank = Bank(accountNumber = "1234", trust = 31.2, transactionFee = 2)
 
             // when
             val performPost = mockMVC.post(baseUrl) {
