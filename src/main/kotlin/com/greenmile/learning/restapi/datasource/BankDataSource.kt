@@ -12,4 +12,6 @@ interface BankDataSource {
     fun retrieveByAccountNumber(accountNumber: String): Bank
 
     fun retrieveById(id: Int): Bank
+
+    fun update(id: Int, data: Bank): Bank
 }

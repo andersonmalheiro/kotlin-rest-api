@@ -12,4 +12,5 @@ class BankService(@Qualifier("bankDataSourceImpl") private val dataSource: BankD
     fun getBankById(id: Int): Bank = dataSource.retrieveById(id)
     fun getBankByAccountNumber(accountNumber: String): Bank  = dataSource.retrieveByAccountNumber(accountNumber)
     fun addBank(bank: Bank): Int = dataSource.create(bank)
+    fun updateBank(id: Int, data: Bank): Bank = dataSource.update(id, data)
 }

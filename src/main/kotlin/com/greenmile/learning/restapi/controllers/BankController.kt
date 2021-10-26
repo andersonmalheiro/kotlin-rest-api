@@ -18,4 +18,8 @@ class BankController(private val service: BankService) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun addBank(@RequestBody bank: Bank) = service.addBank(bank)
+
+    @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    fun updateBank(@PathVariable id: Int, @RequestBody data: Bank) = service.updateBank(id, data)
 }

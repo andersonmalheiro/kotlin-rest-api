@@ -36,4 +36,18 @@ class MockBankDataSource : BankDataSource {
 
         return bank.id!!
     }
+
+    override fun update(id: Int, data: Bank): Bank {
+        response.data.find { it.id == id } ?: throw IllegalArgumentException("Bank with account number $id not found")
+
+        response.data.map {
+            if (it.id == id) it.copy(
+                accountNumber = data.accountNumber,
+                trust = data.trust,
+                transactionFee = data.transactionFee,
+            ) else it
+        }
+
+        return data
+    }
 }
