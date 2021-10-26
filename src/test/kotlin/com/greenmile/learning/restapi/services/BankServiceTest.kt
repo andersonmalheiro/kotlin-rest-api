@@ -1,7 +1,6 @@
 package com.greenmile.learning.restapi.services
 
 import com.greenmile.learning.restapi.datasource.BankDataSource
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
@@ -16,9 +15,9 @@ internal class BankServiceTest {
         // every { dataSource.retrieveBanks() } returns emptyList()
 
         // when
-        bankService.getBanks()
+        bankService.getBanks(null)
 
         // then
-        verify(exactly = 1) { dataSource.retrieveBanks() } // verify if the method was called exactly one time
+        verify(exactly = 1) { dataSource.list(null) } // verify if the method was called exactly one time
     }
 }

@@ -2,11 +2,14 @@ package com.greenmile.learning.restapi.datasource
 
 import com.greenmile.learning.restapi.model.Bank
 import com.greenmile.learning.restapi.model.BankDAO
+import com.greenmile.learning.restapi.model.ListResponse
 
 interface BankDataSource {
-    fun retrieveBanks(): Collection<Bank>
+    fun create(bank: Bank): Int
 
-    fun retrieveBank(accountNumber: String): Bank
+    fun list(accountNumber: String?): ListResponse<Bank>
 
-    fun createBank(bank: Bank): Bank
+    fun retrieveByAccountNumber(accountNumber: String): Bank
+
+    fun retrieveById(id: Int): Bank
 }

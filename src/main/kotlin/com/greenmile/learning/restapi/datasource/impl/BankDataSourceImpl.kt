@@ -4,16 +4,18 @@ import com.greenmile.learning.restapi.datasource.BankDataSource
 import com.greenmile.learning.restapi.model.Bank
 import com.greenmile.learning.restapi.model.BankDAO
 import com.greenmile.learning.restapi.model.Banks
+import com.greenmile.learning.restapi.model.ListResponse
+import com.greenmile.learning.restapi.utils.bankDAOToEntity
+import com.greenmile.learning.restapi.utils.listResponseFactory
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.postgresql.util.PSQLException
 import org.springframework.stereotype.Repository
 import java.sql.BatchUpdateException
 import java.sql.SQLIntegrityConstraintViolationException
 
 @Repository
 class BankDataSourceImpl : BankDataSource {
-    override fun createBank(bank: Bank): Bank {
+    override fun create(bank: Bank): Int {
         try {
             val newBank = transaction {
                 BankDAO.new {
@@ -23,47 +25,43 @@ class BankDataSourceImpl : BankDataSource {
                 }
             }
 
-            return Bank(
-                id = newBank.id.value,
-                accountNumber = newBank.accountNumber,
-                trust = newBank.trust,
-                transactionFee = newBank.transactionFee,
-            )
+            return newBank.id.value
         } catch (e: Exception) {
             when ((e as? ExposedSQLException)?.cause) {
-                is SQLIntegrityConstraintViolationException ->
+                is SQLIntegrityConstraintViolationException, is BatchUpdateException ->
                     throw IllegalArgumentException("Bank with account number ${bank.accountNumber} already exists")
-                is BatchUpdateException -> {
-                    throw IllegalArgumentException("SQL constraint violated")
-                }
                 else ->
-                    throw Exception(e.message)
+                    throw e
             }
         }
     }
 
-    override fun retrieveBank(accountNumber: String): Bank {
+    override fun retrieveByAccountNumber(accountNumber: String): Bank {
         val foundBank = transaction {
             BankDAO.find { Banks.accountNumber eq accountNumber }.firstOrNull()
                 ?: throw NoSuchElementException("Could not find a bank with account number $accountNumber")
         }
 
-        return Bank(
-            id = foundBank.id.value,
-            accountNumber = foundBank.accountNumber,
-            trust = foundBank.trust,
-            transactionFee = foundBank.transactionFee,
-        )
+        return bankDAOToEntity(foundBank)
     }
 
-    override fun retrieveBanks(): Collection<Bank> = transaction {
-        BankDAO.all().map {
-            Bank(
-                id = it.id.value,
-                accountNumber = it.accountNumber,
-                trust = it.trust,
-                transactionFee = it.transactionFee,
-            )
+    override fun retrieveById(id: Int): Bank {
+        val bank = transaction {
+            BankDAO.findById(id) ?: throw NoSuchElementException("Could not find a bank with ID $id")
+        }
+
+        return bankDAOToEntity(bank)
+    }
+
+    override fun list(accountNumber: String?): ListResponse<Bank> = transaction {
+        if (accountNumber != null) {
+            val banks = BankDAO.find { Banks.accountNumber eq accountNumber }.map { bankDAOToEntity(it) }
+            val count = BankDAO.find { Banks.accountNumber eq accountNumber }.count()
+            listResponseFactory(banks, count)
+        } else {
+            val banks = BankDAO.all().map { bankDAOToEntity(it) }
+            val count = BankDAO.all().count()
+            listResponseFactory(banks, count)
         }
     }
 }
