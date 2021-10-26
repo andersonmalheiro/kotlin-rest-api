@@ -4,9 +4,12 @@ import com.greenmile.learning.restapi.datasource.BankDataSource
 import com.greenmile.learning.restapi.model.Bank
 import com.greenmile.learning.restapi.model.BankDAO
 import com.greenmile.learning.restapi.model.Banks
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.postgresql.util.PSQLException
 import org.springframework.stereotype.Repository
+import java.sql.BatchUpdateException
+import java.sql.SQLIntegrityConstraintViolationException
 
 @Repository
 class BankDataSourceImpl : BankDataSource {
@@ -26,14 +29,23 @@ class BankDataSourceImpl : BankDataSource {
                 trust = newBank.trust,
                 transactionFee = newBank.transactionFee,
             )
-        } catch (e: PSQLException) {
-            throw Error("Bank with account number ${bank.accountNumber} already exists")
+        } catch (e: Exception) {
+            when ((e as? ExposedSQLException)?.cause) {
+                is SQLIntegrityConstraintViolationException ->
+                    throw IllegalArgumentException("Bank with account number ${bank.accountNumber} already exists")
+                is BatchUpdateException -> {
+                    throw IllegalArgumentException("SQL constraint violated")
+                }
+                else ->
+                    throw Exception(e.message)
+            }
         }
     }
 
     override fun retrieveBank(accountNumber: String): Bank {
         val foundBank = transaction {
-            BankDAO.find { Banks.accountNumber eq accountNumber }.first()
+            BankDAO.find { Banks.accountNumber eq accountNumber }.firstOrNull()
+                ?: throw NoSuchElementException("Could not find a bank with account number $accountNumber")
         }
 
         return Bank(
