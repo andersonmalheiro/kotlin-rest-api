@@ -1,17 +1,8 @@
 package com.greenmile.learning.restapi.datasource
 
 import com.greenmile.learning.restapi.model.Bank
-import com.greenmile.learning.restapi.model.BankDAO
-import com.greenmile.learning.restapi.model.ListResponse
+import com.greenmile.learning.restapi.model.BankFilters
 
-interface BankDataSource {
-    fun create(bank: Bank): Int
-
-    fun list(accountNumber: String?): ListResponse<Bank>
-
+interface BankDataSource: CrudBaseDataSource<Bank, BankFilters> {
     fun retrieveByAccountNumber(accountNumber: String): Bank
-
-    fun retrieveById(id: Int): Bank
-
-    fun update(id: Int, data: Bank): Bank
 }

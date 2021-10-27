@@ -2,6 +2,7 @@ package com.greenmile.learning.restapi.datasource.mock
 
 import com.greenmile.learning.restapi.datasource.BankDataSource
 import com.greenmile.learning.restapi.model.Bank
+import com.greenmile.learning.restapi.model.BankFilters
 import com.greenmile.learning.restapi.model.ListResponse
 import org.springframework.stereotype.Repository
 
@@ -16,7 +17,7 @@ class MockBankDataSource : BankDataSource {
 
     val response = ListResponse(data = banks, banks.size.toLong())
 
-    override fun list(accountNumber: String?): ListResponse<Bank> = response
+    override fun list(filters: BankFilters): ListResponse<Bank> = response
 
     override fun retrieveByAccountNumber(accountNumber: String): Bank =
         response.data.firstOrNull { it.accountNumber == accountNumber }
@@ -49,5 +50,9 @@ class MockBankDataSource : BankDataSource {
         }
 
         return data
+    }
+
+    override fun delete(id: Int) {
+        TODO("Not yet implemented")
     }
 }

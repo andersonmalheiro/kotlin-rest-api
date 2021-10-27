@@ -1,7 +1,7 @@
 package com.greenmile.learning.restapi
 
 import com.greenmile.learning.restapi.db.impl.PostgresDbConnector
-import com.greenmile.learning.restapi.model.Banks
+import com.greenmile.learning.restapi.dao.Banks
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger

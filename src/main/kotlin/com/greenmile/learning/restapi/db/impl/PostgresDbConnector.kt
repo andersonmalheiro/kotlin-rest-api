@@ -22,8 +22,4 @@ class PostgresDbConnector(
             password = password
         )
     }
-
-    fun init() {
-        connect()
-    }
 }

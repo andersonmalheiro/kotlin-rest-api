@@ -1,14 +1,17 @@
 package com.greenmile.learning.restapi.datasource.impl
 
+import com.greenmile.learning.restapi.dao.BankDAO
+import com.greenmile.learning.restapi.dao.Banks
 import com.greenmile.learning.restapi.datasource.BankDataSource
 import com.greenmile.learning.restapi.model.Bank
-import com.greenmile.learning.restapi.model.BankDAO
-import com.greenmile.learning.restapi.model.Banks
+import com.greenmile.learning.restapi.model.BankFilters
 import com.greenmile.learning.restapi.model.ListResponse
 import com.greenmile.learning.restapi.utils.bankDAOToEntity
 import com.greenmile.learning.restapi.utils.listResponseFactory
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.andWhere
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Repository
 import java.sql.BatchUpdateException
@@ -54,17 +57,36 @@ class BankDataSourceImpl : BankDataSource {
         return bankDAOToEntity(bank)
     }
 
-    override fun list(accountNumber: String?): ListResponse<Bank> = transaction {
-        if (accountNumber != null) {
-            val banks = BankDAO.find { Banks.accountNumber eq accountNumber }.orderBy(Banks.id to SortOrder.ASC)
-                .map { bankDAOToEntity(it) }
-            val count = BankDAO.find { Banks.accountNumber eq accountNumber }.count()
-            listResponseFactory(banks, count)
-        } else {
-            val banks = BankDAO.all().orderBy(Banks.id to SortOrder.ASC).map { bankDAOToEntity(it) }
-            val count = BankDAO.all().count()
-            listResponseFactory(banks, count)
+    override fun list(filters: BankFilters): ListResponse<Bank> = transaction {
+        val accountNumber = filters.accountNumber
+        val trust = filters.trust
+        val transactionFee = filters.transactionFee
+
+        val query = Banks.selectAll()
+
+        accountNumber?.let {
+            query.andWhere { Banks.accountNumber eq accountNumber }
         }
+
+        trust?.let {
+            query.andWhere { Banks.trust eq trust }
+        }
+
+        transactionFee?.let {
+            query.andWhere { Banks.transactionFee eq transactionFee }
+        }
+
+        val banks = query.orderBy(Banks.id to SortOrder.ASC).map {
+            Bank(
+                id = it[Banks.id].value,
+                accountNumber = it[Banks.accountNumber],
+                trust = it[Banks.trust],
+                transactionFee = it[Banks.transactionFee],
+            )
+        }
+        val count = query.count()
+
+        listResponseFactory(banks, count)
     }
 
     override fun update(id: Int, data: Bank): Bank {
@@ -84,5 +106,9 @@ class BankDataSourceImpl : BankDataSource {
         } catch (e: Exception) {
             throw e
         }
+    }
+
+    override fun delete(id: Int) {
+        TODO("Not yet implemented")
     }
 }

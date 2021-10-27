@@ -10,7 +10,15 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/banks")
 class BankController(private val service: BankService) {
     @GetMapping
-    fun getAllBanks(@RequestParam(required = false) accountNumber: String?): ListResponse<Bank> = service.getBanks(accountNumber)
+    fun getAllBanks(
+        @RequestParam(required = false) accountNumber: String?,
+        @RequestParam(required = false) trust: Double?,
+        @RequestParam(required = false) transactionFee: Int?,
+    ): ListResponse<Bank> = service.getBanks(
+        accountNumber,
+        trust,
+        transactionFee
+    )
 
     @GetMapping("/{id}")
     fun getBankById(@PathVariable id: Int) = service.getBankById(id)
